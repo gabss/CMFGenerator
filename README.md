@@ -21,6 +21,8 @@ Once imported the project files, it is possible to start the generator with
      configurationsRDD = generateCMF(sc, n, m)
      configurationsRDD.saveAsSequenceFile(path [, "org.apache.hadoop.io.compress.BZip2Codec"])
  
+ The format of the cmfs will be (None, str(cmf)). We have to convert the array in string otherwise we can not save it as sequence file, without modify spark source. 
+ 
  To load them again:
  
      configurationsRDD = sc.sequenceFile(path)
