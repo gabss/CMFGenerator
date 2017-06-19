@@ -1,17 +1,4 @@
 
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Dec  1 20:17:28 2016
-
-@author: Stefano
-"""
-
-import time as t
-import pickle
-import gzip
-import random
-import multiprocessing as mp
-
 # Dimesion of cells
 DIM_VERTEX = 0
 DIM_EDGE = 1
