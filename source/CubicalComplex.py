@@ -2,10 +2,58 @@
 # Dimesion of cells
 DIM_VERTEX = 0
 DIM_EDGE = 1
-DIM_SQUARE = 2  
+DIM_SQUARE = 2
+
+baseProper = ([4], 
+              [4, 7], 
+              [4, 5], 
+              [4, 5, 7], 
+              [3, 4], 
+              [3, 4, 7], 
+              [3, 4, 5], 
+              [3, 4, 5, 7], 
+              [1, 4], 
+              [1, 4, 7], 
+              [1, 4, 5], 
+              [1, 4, 5, 7], 
+              [0, 1, 3, 4], 
+              [0, 1, 3, 4, 7], 
+              [0, 1, 3, 4, 5], 
+              [0, 1, 3, 4, 5, 7], 
+              [1, 2, 4, 5], 
+              [1, 2, 4, 5, 7], 
+              [1, 3, 4], 
+              [1, 3, 4, 7], 
+              [1, 2, 3, 4, 5], 
+              [0, 1, 2, 3, 4, 5], 
+              [1, 2, 3, 4, 5, 7], 
+              [0, 1, 2, 3, 4, 5, 7], 
+              [3, 4, 6, 7], 
+              [3, 4, 5, 6, 7], 
+              [1, 3, 4, 6, 7], 
+              [0, 1, 3, 4, 6, 7], 
+              [1, 3, 4, 5], 
+              [1, 3, 4, 5, 6, 7], 
+              [1, 2, 3, 4, 5, 6, 7], 
+              [0, 1, 3, 4, 5, 6, 7], 
+              [0, 1, 2, 3, 4, 5, 6, 7], 
+              [4, 5, 7, 8], 
+              [3, 4, 5, 7, 8], 
+              [3, 4, 5, 6, 7, 8], 
+              [1, 4, 5, 7, 8], 
+              [1, 2, 4, 5, 7, 8], 
+              [1, 3, 4, 5, 7, 8], 
+              [1, 3, 4, 5, 6, 7, 8], 
+              [1, 2, 3, 4, 5, 7, 8], 
+              [1, 2, 3, 4, 5, 6, 7, 8], 
+              [0, 1, 3, 4, 5, 7, 8], 
+              [0, 1, 3, 4, 5, 6, 7, 8], 
+              [0, 1, 2, 3, 4, 5, 7, 8], 
+              [0, 1, 2, 3, 4, 5, 6, 7, 8],
+              [1,3,4,5,7])
 
 class CubicalComplex:
-      
+
     def __init__(self, x, y):
         # Some possible useful data
         self.x = x
@@ -17,7 +65,7 @@ class CubicalComplex:
         self.createDim()
         self.createNeighboursMap()
         self.createEdgeVertexMap()
-     
+
     def createDim(self):
         # Constructs an array containing the dimension of the elements
         self.dim = [0 for i in range(0, self.cellsNumber)]
@@ -36,7 +84,7 @@ class CubicalComplex:
                     self.dim[i] = DIM_SQUARE
 
     def createNeighboursMap(self):
-        # Constructs the list of neighbours to whom a cell could connect                
+        # Constructs the list of neighbours to whom a cell could connect
         self.neighbours = {}
         for i in range(0, self.cellsNumber):
             self.neighbours[i] = [] # Squares will have an empty list
@@ -104,34 +152,27 @@ class CubicalComplex:
                     self.edgeVertex[i].append(i-1)
                     self.edgeVertex[i].append(i+1)
                     
-                  
+    
     def isProperSet(self, multiVector):
-        # Check if the multiVector is a proper set
-        # We'll keep trace of the set already checked to improve the performance
-        if(tuple(multiVector) not in self.properSet):
-            mouth = self.cl(multiVector).difference(multiVector)
-            if (mouth == self.cl(mouth)):
-                self.properSet[tuple(multiVector)] = True
-            else:
-                self.properSet[tuple(multiVector)] = False
-                
-        return self.properSet[tuple(multiVector)]
-            
+        tMultiVector = tuple(multiVector)
+        if(tMultiVector not in self.properSet):
+            for i in multiVector:
+                if(self.dim[i] == DIM_SQUARE):
+                    result = self.checkProper(i, multiVector)
+                    self.properSet[tMultiVector] = result
+                    return result
+            self.properSet[tMultiVector] = True
+            return True
+        return self.properSet[tMultiVector]
 
-    def cl(self, cells):
-        # Define the closure of a set
-        closure = set(cells)
-        for cell in cells:
-            if(self.dim[cell] == DIM_EDGE):
-                closure.add(self.edgeVertex[cell][0])
-                closure.add(self.edgeVertex[cell][1])
-            if(self.dim[cell] == DIM_SQUARE):
-                closure.add(cell+1)
-                closure.add(cell-1)
-                closure.add(cell - self.xCells)
-                closure.add(cell - self.xCells - 1)
-                closure.add(cell - self.xCells + 1)
-                closure.add(cell + self.xCells)
-                closure.add(cell + self.xCells + 1)
-                closure.add(cell + self.xCells - 1)
-        return closure
+    def row(self, i):
+        return int(i/self.xCells)
+
+    def checkProper(self, square, mv):
+        db = self.xCells + 1 - 4
+        dc = square - 4
+        squareRow = self.row(square)
+        mvTrasl = []
+        for i in mv:
+            mvTrasl.append( i + (squareRow-self.row(i)) * db - dc )
+        return mvTrasl in baseProper

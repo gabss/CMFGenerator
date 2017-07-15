@@ -29,13 +29,13 @@ def generatePossibleNodeConfigurations(element, configuration, cComplex):
             conf[element] = neighbour
             elements = {}
             for i in range(0, len(conf)):
-                elements[i] = []
-            for i in range(0, len(conf)):
+                if(conf[i] not in elements):
+                    elements[conf[i]] = []
                 elements[conf[i]].append(i)
             founded = False
             for el in elements.values():
                 if(len(el) > 0):
-                    if(not cComplex.isProperSet(set(el))):
+                    if(not cComplex.isProperSet(el)):
                         founded = True
                         break
             if(not founded):
@@ -113,7 +113,7 @@ def generateCMF(sc, n, m, monoProcLimit = 1, confPerProc = -1, monop = False):
             element = element + 1
             baseConfs = startConfs.copy()
         # Parallelize the list with spark
-        parCmfs = sc.parallelize(baseConfs)
+        parCmfs = sc.parallelize(baseConfs[0:5])
         # flatMap allows us to have just one list with all the configurations
         return parCmfs.flatMap(lambda cmf: iterativeCMFGeneration(cComplex, cmf, element-1, elementsList, confPerProc))
     else:
